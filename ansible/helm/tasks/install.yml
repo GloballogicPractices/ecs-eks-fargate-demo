@@ -11,12 +11,19 @@
     dest: "{{ tmp_file.path }}"
     content: "{{ helm_values | to_nice_yaml( width=50, explicit_start=True, explicit_end=True) }}"
 
+- name: Update deps
+  args:
+    executable: /bin/bash
+    chdir: "{{ helm_chart }}"
+  shell: |
+    helm repo update
+    helm dependency build
+
 - name: Install chart
   args:
     executable: /bin/bash
   shell: |
     set -ex
-    helm repo update
     helm upgrade "{{ helm_name }}" --install \
       --namespace "{{ helm_namespace }}" \
       --values "{{ tmp_file.path }}" \

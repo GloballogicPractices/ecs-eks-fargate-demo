@@ -1,1 +1,6 @@
-dependencies: []
+dependencies:
+- name: redis
+  version: 10.6.3
+  repository: https://charts.bitnami.com/bitnami
+  condition: createDB
+  alias: db

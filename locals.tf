@@ -20,6 +20,7 @@ locals {
           image = {
             repository = "tutum/hello-world"
           }
+          createDB = true
         }
       }
       demo_eks_fargate = {

@@ -6,6 +6,8 @@ image:
 
 serviceType: LoadBalancer
 
+createDB: false
+
 resources:
   requests:
     memory: 100Mi
@@ -13,3 +15,7 @@ resources:
   limits:
     memory: 1Gi
     cpu: 1000m
+
+db:
+  persistence:
+    enabled: true
