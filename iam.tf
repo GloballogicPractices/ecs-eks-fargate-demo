@@ -91,3 +91,32 @@ resource "aws_iam_role_policy" "fargate_task_role" {
 }
 EOF
 }
+
+resource "aws_iam_user" "ansible" {
+  name = var.name
+  path = "/system/"
+}
+
+resource "aws_iam_access_key" "ansible" {
+  user = aws_iam_user.ansible.name
+}
+
+resource "aws_iam_user_policy" "ansible" {
+  name = var.name
+  user = aws_iam_user.ansible.name
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ecs:*"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}

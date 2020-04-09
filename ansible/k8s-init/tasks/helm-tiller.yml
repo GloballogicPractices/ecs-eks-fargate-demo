@@ -1,0 +1,28 @@
+---
+
+- name: Create temporary directory
+  register: tmp_dir
+  tempfile:
+    state: directory
+    suffix: k8s-aws-auth
+
+- name: Create tiller SA
+  template:
+    dest: "{{ tmp_dir.path }}/tiller-sa.yml"
+    src: "tiller-sa.yml.j2"
+    trim_blocks: False
+
+- name: Deploy helm tiller
+  args:
+    executable: /bin/bash
+  shell: |
+    set -ex
+    if ! helm status &> /dev/null; then
+       kubectl apply -f "{{ tmp_dir.path }}/tiller-sa.yml"
+       helm init --history-max 200 --service-account tiller --wait
+    fi
+
+- name: Cleanup
+  file:
+    path: "{{ tmp_dir.path }}"
+    state: absent

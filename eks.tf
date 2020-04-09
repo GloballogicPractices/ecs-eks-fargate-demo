@@ -14,6 +14,21 @@ module "eks" {
   subnets         = concat(module.vpc.public_subnets, module.vpc.private_subnets)
   vpc_id          = module.vpc.vpc_id
 
+  write_kubeconfig   = true
+  config_output_path = "${local.ansible_target}/${local.kubeconfig_path}"
+
+  map_roles = [
+    {
+      rolearn  = aws_iam_role.fargate.arn
+      username = "system:node:{{SessionName}}"
+      groups   = [
+        "system:bootstrappers",
+        "system:nodes",
+        "system:node-proxier",
+      ]
+    },
+  ]
+
   worker_groups = [
     {
       instance_type = "t3.medium"

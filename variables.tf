@@ -22,6 +22,18 @@ variable "aws_region" {
   default = "eu-west-1"
 }
 
+variable "k8s_namespace_demo_ec2" {
+  type = string
+
+  default = "demo-ec2"
+}
+
+variable "k8s_namespace_demo_fargate" {
+  type = string
+
+  default = "demo-fargate"
+}
+
 variable "aws_zones" {
   type = list(string)
 
@@ -50,4 +62,22 @@ variable "public_subnets_cidrs" {
     "10.0.1.0/24",
     "10.0.2.0/24",
   ]
+}
+
+variable "ansible_run" {
+  type = bool
+
+  default = false
+}
+
+variable "ansible_trigger" {
+  type = string
+
+  default = ""
+}
+
+variable "ansible_arguments" {
+  type = string
+
+  default = ""
 }
