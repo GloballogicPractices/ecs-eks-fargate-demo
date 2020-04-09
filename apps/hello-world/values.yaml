@@ -1,8 +1,10 @@
 image:
   registry: docker.io
-  repository: tutum/hello-world
+  repository: ~
   tag: latest
   pullPolicy: Always
+
+serviceType: LoadBalancer
 
 resources:
   requests:

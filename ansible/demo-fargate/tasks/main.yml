@@ -1,0 +1,28 @@
+---
+
+- name: Create task definition
+  ecs_taskdefinition:
+    family: "{{ apps.demo_fargate.name }}"
+    containers:
+      - name: "{{ apps.demo_fargate.name }}"
+        essential: true
+        image: "{{ apps.demo_fargate.image }}"
+        portMappings: "{{ apps.demo_fargate.ports }}"
+    launch_type: FARGATE
+    cpu: "512"
+    memory: "1024"
+    state: present
+    network_mode: awsvpc
+
+- name: Create service
+  ecs_service:
+    state: present
+    launch_type: FARGATE
+    name: "{{ apps.demo_fargate.name }}"
+    cluster: "{{ apps.demo_fargate.cluster }}"
+    task_definition: "{{ apps.demo_fargate.name }}:1"
+    desired_count: 1
+    network_configuration:
+      assign_public_ip: true
+      security_groups: []
+      subnets: "{{ apps.demo_fargate.subnets }}"

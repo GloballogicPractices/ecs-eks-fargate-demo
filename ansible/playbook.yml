@@ -12,3 +12,6 @@
     - role: demo-eks-fargate
       tags:
         - demo-eks-fargate
+    - role: demo-fargate
+      tags:
+        - demo-fargate
