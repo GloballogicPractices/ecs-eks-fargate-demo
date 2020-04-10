@@ -32,12 +32,22 @@ kubectl expose deployment/nginx-deployment
 kubectl port-forward nginx-deployment-CHANGE_ME 8080:80
 ```
 
+Requirements:
+- kubectl
+- ekstl
+
 ### ECS + Fargate
 ```
 aws ecs create-cluster --cluster-name fargate-cluster --region eu-west-1
 aws ecs register-task-definition --cli-input-json file://task_definition.json --region eu-west-1
 aws ecs create-service --region eu-west-1 --cluster fargate-cluster --service-name fargate-service --task-definition sample-fargate:1 --desired-count 2 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={assignPublicIp=ENABLED,subnets=[subnet-***],securityGroups=[sg-***]}"
 ```
+
+Requirements:
+- awscli
+
+Notes:
+You need to specify your real Security Group Id and Public or Private Subnet.
 
 ## Automatic deployment
 
@@ -46,7 +56,6 @@ Requirements:
 - helm
 - terraform
 - ansible-playbook
-- helm
 
 To deploy everything:
 ```bash
