@@ -26,7 +26,8 @@ No GPU pod configurations available.
 
 ### EKS+Fargate
 
-```eksctl create cluster --name demo-newsblog --region eu-west-1 --fargate
+```
+eksctl create cluster --name demo-newsblog --region eu-west-1 --fargate
 kubectl apply -f https://k8s.io/examples/application/deployment.yaml
 kubectl expose deployment/nginx-deployment
 kubectl port-forward nginx-deployment-CHANGE_ME 8080:80
