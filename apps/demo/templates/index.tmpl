@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <title>Demo app {{ .version }}</title>
+</head>
+<body>
+<h1>
+  Demo app {{ .version }}
+</h1>
+{{ if .podName }}
+  <p>
+    Running in pod <b>{{ .podName }}</b> on node <b>{{ .nodeName }}</b>
+  </p>
+{{ end }}
+{{ if .taskId }}
+  <p>
+    Running in task <b>{{ .taskId }}</b>
+  </p>
+{{ end }}
+<p>
+  Environment: <b>{{ .environment }}</b>
+</p>
+<p>
+  Is canary: <b>{{ .isCanary }}</b>
+</p>
+</body>
+</html>

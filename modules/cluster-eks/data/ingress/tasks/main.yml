@@ -1,0 +1,13 @@
+---
+
+- name: Deploy Nginx ingress
+  when: ingress_nginx.enabled
+  include_role:
+    name: ingress
+    tasks_from: ingress-nginx
+
+- name: Deploy ALB ingress
+  when: ingress_alb.enabled
+  include_role:
+    name: ingress
+    tasks_from: ingress-alb

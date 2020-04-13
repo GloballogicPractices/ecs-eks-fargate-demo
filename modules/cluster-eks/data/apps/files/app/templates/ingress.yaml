@@ -1,0 +1,46 @@
+{{- if and (.Values.ingress.enabled) (or (not .Values.ingress.isALB) (not .Values.isCanary)) -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "name" . }}
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+    {{- if .Values.ingress.isALB }}
+    # https://github.com/kubernetes-sigs/aws-alb-ingress-controller/issues/1150
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/conditions.{{ template "name" . }}-canary: |
+      [{"Field":"http-header","HttpHeaderConfig":{"HttpHeaderName": "canary", "Values":["true"]}}]
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    {{- else }}
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    {{- if .Values.isCanary }}
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "0"
+    {{- end }}
+    {{- end }}
+spec:
+  rules:
+  - host: {{ .Values.ingress.domain | quote }}
+    http:
+      paths:
+      {{- if .Values.ingress.isALB }}
+      - path: /*
+        backend:
+          serviceName: {{ template "name" . }}
+          servicePort: 80
+      - path: /*
+        backend:
+          serviceName: {{ template "name" . }}-canary
+          servicePort: use-annotation
+      {{- else }}
+      - path: /
+        backend:
+          serviceName: {{ template "name" . }}
+          servicePort: {{ .Values.http.port }}
+      {{- end }}
+{{- end -}}

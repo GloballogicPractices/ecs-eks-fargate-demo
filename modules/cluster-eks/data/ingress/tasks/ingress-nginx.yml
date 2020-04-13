@@ -1,0 +1,20 @@
+---
+
+- name: Deploy Helm chart
+  include_role:
+    name: helm
+    tasks_from: install
+  vars:
+    helm_name: "{{ ingress_nginx.name }}"
+    helm_namespace: "{{ ingress_nginx.namespace }}"
+    helm_values: "{{ ingress_nginx.helm_values }}"
+    helm_chart: "stable/nginx-ingress"
+    helm_version: "{{ ingress_nginx.chart_version }}"
+
+- name: Save endpoints
+  args:
+    executable: /bin/bash
+  with_items: "{{ apps }}"
+  shell: |
+    ENDPOINT="$(kubectl -n {{ ingress_nginx.namespace }} get svc nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')"
+    echo "${ENDPOINT}" > "{{ ingress_nginx.endpoint_file }}_{{ item.name }}"

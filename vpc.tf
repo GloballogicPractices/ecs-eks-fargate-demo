@@ -1,5 +1,6 @@
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
+  version = "~> 2.33"
 
   name = var.name
   cidr = var.cidr
@@ -21,9 +22,7 @@ module "vpc" {
     "kubernetes.io/role/elb" = 1
   }
 
-  tags = {
+  tags = merge(local.tags, {
     Name = var.name
-
-    "kubernetes.io/cluster/${var.name}" = "shared"
-  }
+  }, module.cluster-eks-fargate.vpc_tags, module.cluster-eks-ec2.vpc_tags)
 }

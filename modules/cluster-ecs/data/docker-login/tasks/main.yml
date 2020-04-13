@@ -1,0 +1,16 @@
+---
+
+- name: ECR login cmd
+  shell: "aws ecr get-login --region {{ aws_region }} --no-include-email"
+  register: ecr_login_cmd
+
+- name: ECR login (local)
+  delegate_to: localhost
+  args:
+    executable: /bin/bash
+  shell: "{{ ecr_login_cmd.stdout }}"
+
+- name: ECR login
+  args:
+    executable: /bin/bash
+  shell: "{{ ecr_login_cmd.stdout }}"

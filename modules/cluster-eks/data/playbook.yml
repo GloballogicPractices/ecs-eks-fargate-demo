@@ -1,0 +1,17 @@
+---
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - role: docker-login
+      tags:
+        - init
+    - role: k8s-init
+      tags:
+        - init
+    - role: ingress
+      tags:
+        - init
+    - role: apps
+      tags:
+        - apps

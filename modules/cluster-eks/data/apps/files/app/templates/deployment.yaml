@@ -1,0 +1,56 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "name" . }}
+  labels:
+    app: {{ template "name" . }}
+spec:
+  replicas: 2
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+    spec:
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 12 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 12 }}
+      {{- end }}
+      containers:
+        - name: "main"
+          image: {{ template "image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.http.port }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.http.ping }}
+              port: {{ .Values.http.port }}
+              scheme: {{ .Values.http.scheme }}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          env:
+            - name: DEMO_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: DEMO_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          {{- if .Values.isCanary }}
+            - name:  "DEMO_IS_CANARY"
+              value: "true"
+          {{- end }}
+          {{- if .Values.extraEnv }}
+          {{- include "tplValue" (dict "value" .Values.extraEnv "context" $) | nindent 12 }}
+          {{- end }}

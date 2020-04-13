@@ -1,0 +1,39 @@
+---
+
+- name: Create temporary file
+  register: tmp_file
+  tempfile:
+    state: file
+    suffix: "helm-values-{{ helm_name }}"
+
+- name: Write values
+  copy:
+    dest: "{{ tmp_file.path }}"
+    content: "{{ helm_values | to_nice_yaml( width=50, explicit_start=True, explicit_end=True) }}"
+
+- name: Update deps
+  args:
+    executable: /bin/bash
+    chdir: "{{ helm_chart }}"
+  when: helm_builddeps is defined and helm_builddeps == true
+  shell: |
+    helm repo update
+    helm dependency build
+
+- name: Install chart
+  args:
+    executable: /bin/bash
+  shell: |
+    set -ex
+    helm upgrade "{{ helm_name }}" --install \
+      --namespace "{{ helm_namespace }}" \
+      --values "{{ tmp_file.path }}" \
+      --version "{{ helm_version }}" \
+      --force \
+      --wait \
+      "{{ helm_chart }}"
+
+- name: Cleanup
+  file:
+    path: "{{ tmp_file.path }}"
+    state: absent
