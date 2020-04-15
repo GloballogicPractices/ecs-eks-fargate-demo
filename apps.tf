@@ -91,9 +91,29 @@ locals {
       name   = "demo"
       source = abspath("${local.apps_dir}/demo")
 
-      env = merge(local.env_common, {
+      http = {
+        port   = local.app_port
+        scheme = local.app_scheme
+        ping   = local.app_ping
+      }
+
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+
+      cpu    = "512"
+      memory = "1024"
+
+      env = [for k, v in merge(local.env_common, {
         DEMO_ENVIRONMENT = "ECS on EC2"
-      })
+
+        ECS_ENABLE_CONTAINER_METADATA = "true"
+      }) : {
+        name: k, value: v
+      }]
     }
   ]
 
@@ -102,9 +122,27 @@ locals {
       name   = "demo"
       source = abspath("${local.apps_dir}/demo")
 
-      env = merge(local.env_common, {
+      http = {
+        port   = local.app_port
+        scheme = local.app_scheme
+        ping   = local.app_ping
+      }
+
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+
+      cpu    = "512"
+      memory = "1024"
+
+      env = [for k, v in merge(local.env_common, {
         DEMO_ENVIRONMENT = "ECS on Fargate"
-      })
+      }) : {
+        name: k, value: v
+      }]
     }
   ]
 }

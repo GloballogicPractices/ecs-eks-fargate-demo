@@ -8,6 +8,7 @@ module "cluster-ecs-fargate" {
   aws_profile = var.aws_profile
   aws_region  = var.aws_region
 
+  vpc_id              = module.vpc.vpc_id
   vpc_private_subnets = module.vpc.private_subnets
   vpc_public_subnets  = module.vpc.public_subnets
 

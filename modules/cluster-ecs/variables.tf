@@ -10,6 +10,10 @@ variable "aws_region" {
   type = string
 }
 
+variable "vpc_id" {
+  type = string
+}
+
 variable "run_on_fargate" {
   type = bool
 }
@@ -43,7 +47,24 @@ variable "apps" {
     name   = string
     source = string
 
-    env = map(string)
+    http = object({
+      port   = number
+      scheme = string
+      ping   = string
+    })
+
+    portMappings = list(object({
+      hostPort      = number
+      containerPort = number
+    }))
+
+    cpu    = string
+    memory = string
+
+    env = list(object({
+      name  = string
+      value = string
+    }))
   }))
 }
 

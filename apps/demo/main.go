@@ -7,6 +7,10 @@ import (
 	"os"
 )
 
+type ECSMetadata struct {
+	ContainerInstanceArn string `json:"string"`
+}
+
 func main() {
 	r := gin.Default()
 
@@ -22,6 +26,28 @@ func main() {
 		version = fmt.Sprintf("%s-canary", version)
 	}
 
+	taskName := ""
+	//if os.Getenv("ECS_ENABLE_CONTAINER_METADATA") == "true" {
+	//	resp, err := http.Get(os.Getenv("ECS_CONTAINER_METADATA_URI_V4"))
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//
+	//	defer resp.Body.Close()
+	//	body, err := ioutil.ReadAll(resp.Body)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//
+	//	metadata := ECSMetadata{}
+	//	err = json.Unmarshal(body, &metadata)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//
+	//	taskName = metadata.ContainerInstanceArn
+	//}
+
 	r.LoadHTMLGlob("templates/*")
 
 	r.GET("/", func(c *gin.Context) {
@@ -31,6 +57,7 @@ func main() {
 			"isCanary":    isCanary,
 			"podName":     podName,
 			"nodeName":    nodeName,
+			"taskName":    taskName,
 		})
 	})
 
