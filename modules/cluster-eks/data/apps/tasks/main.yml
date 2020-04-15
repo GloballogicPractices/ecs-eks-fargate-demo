@@ -1,0 +1,73 @@
+---
+
+- name: Path to helm chart
+  set_fact:
+    chart_path: "{{ role_path }}/files/app"
+
+- name: Build and push "build" image
+  args:
+    executable: /bin/bash
+  with_items: "{{ apps }}"
+  shell: |
+    set -ex
+    NAME="{{ docker_repo }}:{{ name_prefix }}{{ item.name }}-build-latest"
+    docker pull "${NAME}" || true
+    docker build -t "${NAME}" \
+      --target "build" \
+      "{{ item.source }}"
+    docker push "${NAME}"
+
+- name: Build and push "runtime" image
+  args:
+    executable: /bin/bash
+  with_items: "{{ apps }}"
+  shell: |
+    set -ex
+    NAME="{{ docker_repo }}:{{ name_prefix }}{{ item.name }}-latest"
+    NAME_BUILD="{{ docker_repo }}:{{ name_prefix }}{{ item.name }}-build-latest"
+    docker pull "${NAME}" || true
+    docker pull "${NAME_BUILD}" || true
+    docker build -t "${NAME}" \
+      --cache-from "${NAME_BUILD}" \
+      --target "runtime" \
+      "{{ item.source }}"
+    docker push "${NAME}"
+
+- name: Deploy Helm chart
+  include_role:
+    name: helm
+    tasks_from: install
+  with_items: "{{ apps }}"
+  vars:
+    helm_name: "{{ item.name }}"
+    helm_namespace: "{{ item.namespace }}"
+    helm_values: "{{ item.helm_values | from_json | combine({'ingress':{'isALB':ingress_alb.enabled}, 'image':{'repository':docker_repo,'tag':[name_prefix, item.name, '-latest'] | join('')}},recursive=True) }}"
+    helm_chart: "{{ chart_path }}"
+    helm_version: "1.0.0"
+    helm_builddeps: true
+
+- name: Deploy Helm canary chart
+  include_role:
+    name: helm
+    tasks_from: install
+  with_items: "{{ apps }}"
+  vars:
+    helm_name: "{{ item.name }}-canary"
+    helm_namespace: "{{ item.namespace }}"
+    helm_values: "{{ item.helm_values | from_json | combine({'isCanary':true,'image':{'repository':docker_repo,'tag':[name_prefix, item.name, '-latest'] | join('')}},recursive=True) }}"
+    helm_chart: "{{ chart_path }}"
+    helm_version: "1.0.0-canary"
+    helm_builddeps: true
+
+- name: Save endpoints
+  args:
+    executable: /bin/bash
+  when: ingress_alb.enabled
+  with_items: "{{ apps }}"
+  shell: |
+    ARN="$(kubectl get event --field-selector \
+       involvedObject.name=app,involvedObject.kind=Ingress,reason=CREATE \
+       -o json | jq -r '.items[].message' | grep LoadBalancer  | awk '{print $NF}' | tail -n1)"
+    ENDPOINT="$(aws elbv2 describe-load-balancers --load-balancer-arn ${ARN} \
+       --output json | jq -r '.LoadBalancers[0].DNSName' || true)"
+    echo "${ENDPOINT}" > "{{ ingress_alb.endpoint_file }}_{{ item.name }}"

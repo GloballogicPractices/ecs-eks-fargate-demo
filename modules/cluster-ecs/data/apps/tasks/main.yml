@@ -1,0 +1,57 @@
+---
+
+- name: Build and push "build" image
+  args:
+    executable: /bin/bash
+  with_items: "{{ apps }}"
+  shell: |
+    set -ex
+    NAME="{{ docker_repo }}:{{ name_prefix }}{{ item.name }}-build-latest"
+    docker pull "${NAME}" || true
+    docker build -t "${NAME}" \
+      --target "build" \
+      "{{ item.source }}"
+    docker push "${NAME}"
+
+- name: Build and push "runtime" image
+  args:
+    executable: /bin/bash
+  with_items: "{{ apps }}"
+  shell: |
+    set -ex
+    NAME="{{ docker_repo }}:{{ name_prefix }}{{ item.name }}-latest"
+    NAME_BUILD="{{ docker_repo }}:{{ name_prefix }}{{ item.name }}-build-latest"
+    docker pull "${NAME}" || true
+    docker pull "${NAME_BUILD}" || true
+    docker build -t "${NAME}" \
+      --cache-from "${NAME_BUILD}" \
+      --target "runtime" \
+      "{{ item.source }}"
+    docker push "${NAME}"
+
+#- name: Create task definition
+#  ecs_taskdefinition:
+#    family: "{{ apps.demo_fargate.name }}"
+#    containers:
+#      - name: "{{ apps.demo_fargate.name }}"
+#        essential: true
+#        image: "{{ apps.demo_fargate.image }}"
+#        portMappings: "{{ apps.demo_fargate.ports }}"
+#    launch_type: FARGATE
+#    cpu: "512"
+#    memory: "1024"
+#    state: present
+#    network_mode: awsvpc
+#
+#- name: Create service
+#  ecs_service:
+#    state: present
+#    launch_type: FARGATE
+#    name: "{{ apps.demo_fargate.name }}"
+#    cluster: "{{ apps.demo_fargate.cluster }}"
+#    task_definition: "{{ apps.demo_fargate.name }}:1"
+#    desired_count: 1
+#    network_configuration:
+#      assign_public_ip: true
+#      security_groups: []
+#      subnets: "{{ apps.demo_fargate.subnets }}"

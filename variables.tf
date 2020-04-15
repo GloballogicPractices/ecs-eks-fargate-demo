@@ -1,67 +1,41 @@
 variable "aws_profile" {
   type = string
 
-  default = "gl"
+  default = "default"
 }
 
 variable "name" {
   type = string
+}
 
-  default = "demo-eks-fargate"
+variable "tags" {
+  type = map(string)
+
+  default = {}
+}
+
+variable "dns_name" {
+  type = string
 }
 
 variable "cidr" {
   type = string
-
-  default = "10.0.0.0/16"
 }
 
 variable "aws_region" {
   type = string
-
-  default = "eu-west-1"
-}
-
-variable "k8s_namespace_demo_ec2" {
-  type = string
-
-  default = "demo-ec2"
-}
-
-variable "k8s_namespace_demo_fargate" {
-  type = string
-
-  default = "demo-fargate"
 }
 
 variable "aws_zones" {
   type = list(string)
-
-  default = [
-    "eu-west-1a",
-    "eu-west-1b",
-    "eu-west-1c",
-  ]
 }
 
 variable "private_subnets_cidrs" {
   type = list(string)
-
-  default = [
-    "10.0.10.0/24",
-    "10.0.11.0/24",
-    "10.0.12.0/24",
-  ]
 }
 
 variable "public_subnets_cidrs" {
   type = list(string)
-
-  default = [
-    "10.0.0.0/24",
-    "10.0.1.0/24",
-    "10.0.2.0/24",
-  ]
 }
 
 variable "ansible_run" {

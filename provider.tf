@@ -33,9 +33,22 @@ provider "template" {
 provider "kubernetes" {
   version = "~> 1.11"
 
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
+  alias = "fargate"
+
+  host                   = data.aws_eks_cluster.fargate.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.fargate.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.fargate.token
+  load_config_file       = false
+}
+
+provider "kubernetes" {
+  version = "~> 1.11"
+
+  alias = "ec2"
+
+  host                   = data.aws_eks_cluster.ec2.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.ec2.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.ec2.token
   load_config_file       = false
 }
 
