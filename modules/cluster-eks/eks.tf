@@ -12,7 +12,7 @@ module "eks" {
 
   // TODO: https://aws.amazon.com/blogs/opensource/introducing-fine-grained-iam-roles-service-accounts/
   // https://github.com/kubernetes-sigs/aws-alb-ingress-controller/issues/1092
-  enable_irsa = var.run_on_fargate
+//  enable_irsa = var.run_on_fargate
 
   map_roles = var.run_on_fargate ? [
     {
@@ -26,10 +26,12 @@ module "eks" {
     },
   ] : []
 
-  worker_groups = [
+  worker_groups = var.run_on_fargate ? [] : [
     {
-      instance_type = "t3.medium"
-      asg_max_size  = 5
+      instance_type        = "t3.medium"
+      asg_min_size         = 2
+      asg_desired_capacity = 2
+      asg_max_size         = 5
     }
   ]
 

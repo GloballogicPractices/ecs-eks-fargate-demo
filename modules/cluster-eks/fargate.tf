@@ -21,9 +21,9 @@ resource "aws_eks_fargate_profile" "system" {
 
   selector {
     namespace = "kube-system"
-    labels = {
-      "schedule-type" = "fargate"
-    }
+//    labels = {
+//      "schedule-type" = "fargate"
+//    }
   }
 }
 

@@ -2,3 +2,7 @@
 
 - name: Install helm tiller
   include: helm-tiller.yml
+
+- name: Fix coredns
+  when: ingress_alb.enabled
+  include: coredns.yml
